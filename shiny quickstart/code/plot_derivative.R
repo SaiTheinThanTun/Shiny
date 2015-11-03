@@ -8,6 +8,7 @@ ui <- fluidPage(
               label = "Range of x",
               value = c(-50,50), min = -100, max = 100
               ),
+  textOutput(outputId = "dfun"),
   plotOutput(outputId = "graph"),
   plotOutput(outputId = "differential")
   )
@@ -26,6 +27,10 @@ server <- function(input, output) {
     range2 <- input$xRange[2]
     x <- seq(range1,range2,by=.001)
     plot(x,g(x), type="l", main = "Graph of the derivatives of the function")
+  })
+  output$dfun <- renderPrint({
+    z <- input$f
+    print(D(parse(text=z),"x"))
   })
 }
 

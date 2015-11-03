@@ -11,16 +11,24 @@ ui <- fluidPage(
   fileInput(inputId = "file", label = "Select your input file: (simulated_cloneHLdata_SMRUbyyear.csv in this case)"),
   plotOutput(outputId = "histoplot"),
   textOutput(outputId = "proportions"),
-  dataTableOutput('res')
+  textOutput(outputId = "results")
   )
 
 server <- function(input, output) {
-  output$histoplot <- renderPlot({
+        
+    output$histoplot <- renderPlot({
     inFile <- input$file
     mixdat <- read.csv(inFile$datapath)
     
     N<-ncol(mixdat)-1
     M <- 5
+    
+    
+    output$results <- renderText(
+            M
+    )   
+    
+    
     pval<-0.1
     nboot<-100 # number of iterations for bootstrap
     nsim<-1000 # number of iterations for creating probaility of resistance vs HL graphs
@@ -43,19 +51,19 @@ server <- function(input, output) {
     
     # fit single component model
     for (i in 1:N){
-      # 1 COMPONENT LOG NORMAL
-      nmixdat<-na.omit(mixdat[,i])
-      lmixdat<- log(nmixdat)
-      xll<-fitdistr(lmixdat,"normal")
-      output.loglik[1,i]<- xll$loglik
-      output.mu[1,i]<-xll$estimate[1]
-      output.lambda[1,i]<-1
-      output.sigma[1,i]<-xll$estimate[2]
-      output.mu.se[1,i]<-xll$sd[1]
-      output.sigma.se[1,i]<-xll$sd[2]
-      output.lambda.se[1,i]<-0
-      AIC[1,i]<-2*(3*1-1)-2*output.loglik[1,i]
-      AICdelta[1,i]<-0
+            # 1 COMPONENT LOG NORMAL
+            nmixdat<-na.omit(mixdat[,i])
+            lmixdat<- log(nmixdat)
+            xll<-fitdistr(lmixdat,"normal")
+            output.loglik[1,i]<- xll$loglik
+            output.mu[1,i]<-xll$estimate[1]
+            output.lambda[1,i]<-1
+            output.sigma[1,i]<-xll$estimate[2]
+            output.mu.se[1,i]<-xll$sd[1]
+            output.sigma.se[1,i]<-xll$sd[2]
+            output.lambda.se[1,i]<-0
+            AIC[1,i]<-2*(3*1-1)-2*output.loglik[1,i]
+            AICdelta[1,i]<-0
     }
     
     # fit multiple component models sequntially
@@ -79,8 +87,9 @@ server <- function(input, output) {
           output.lambda[1:j,i]<-res$lambda
           output.mu.se[1:j,i]<-resboot$mu.se
           output.sigma.se[1:j,i]<-resboot$sigma.se
-          output.lambda.se[1:j,i]<-resboot$lambda.se			
-        }
+          output.lambda.se[1:j,i]<-resboot$lambda.se		
+          
+          }
       }
     }
     
@@ -93,13 +102,12 @@ server <- function(input, output) {
             psig<-na.omit(output.sigma[,ds])
             hist(nmixdat,freq=FALSE,main = paste("Northwestern Thai-Myanmar border",2000+ds),xlab = "Clearance half-life (hours)",ylim=c(0,0.6),col="grey",lwd=2,ps=20,breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12))
             x <- seq(0.1, max(nmixdat), length=1000)
-            
             hx<-plam[1]*dlnorm(x,meanlog=(pmu[1]),sdlog=psig[1])
             if(length(plam)>1){
                     for(k in 2:length(plam)){
                             hx<-hx+plam[k]*dlnorm(x,meanlog=(pmu[k]),sdlog=psig[k])
                     }
-            }
+        }
             lines(x,hx,col="red", lwd=5)
             Sys.sleep(0.02)
     }
@@ -109,12 +117,13 @@ server <- function(input, output) {
   output$proportions <- renderText({
           'The estimated proportion of patients with artemesinin resistance is'
   })
-  output$proportions2 <- renderDataTable({
-          res
-          })          
+  
+
+
   
   
-  
+       
+ 
   }
 
 shinyApp(ui = ui, server = server)
