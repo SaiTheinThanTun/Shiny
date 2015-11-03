@@ -32,11 +32,13 @@ ui <- fluidPage(
               value = .1, min = 0, max = 1
   ),
   
-  plotOutput(outputId = "graph")
+  plotOutput(outputId = "graph"),
+  textOutput(outputId = "check")
+  
 )
 
 server <- function(input, output) {
-  output$graph <- renderPlot({
+  genData <- reactive({
     nn <- input$nn
     senmu <- log(input$senmu)
     sensd <- log(input$sensd)
@@ -44,15 +46,21 @@ server <- function(input, output) {
     prop_resist <- input$prop_resist
     resmu <- log(input$resmu)
     ressd <- log(input$ressd)
-    cutoff <- input$cutoff
-    
     
     sen_pop <- rlnorm(nn*(1-prop_resist),senmu,sensd) #sensitive population
     res_pop <- rlnorm(nn*prop_resist,resmu,ressd) #resistant population
-    total_pop <- c(sen_pop,res_pop)
-    hist(total_pop, freq=FALSE,col="grey",lwd=2,ps=20,breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12))
-    lines(density(total_pop),lwd=5, col="red")
-    abline(v=cutoff, lwd=3, col="blue")
+    c(sen_pop,res_pop)
+    #total_pop <- c(sen_pop,res_pop)
+  })
+  output$graph <- renderPlot({
+    
+    hist(genData(), freq=FALSE,col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+    lines(density(genData()),lwd=5, col="red")
+    abline(v=input$cutoff, lwd=3, col="blue")
+    
+  })
+  output$check <- renderText({
+    max(genData())
   })
   
 }
