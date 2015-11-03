@@ -36,6 +36,8 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
+  
+  
   output$graph <- renderPlot({
     nn <- input$nn
     senmu <- log(input$senmu)
@@ -52,7 +54,7 @@ server <- function(input, output) {
     total_pop <- c(sen_pop,res_pop)
     hist(total_pop, freq=FALSE,col="grey",lwd=2,ps=20,breaks=c(0,1,2,3,4,5,6,7,8,9,10,11,12))
     lines(density(total_pop),lwd=5, col="red")
-    abline(v=cutoff, lwd=3, col="blue")
+    abline(v=cutoff, untf = TRUE, lwd=3, col="blue")
   })
   
 }
