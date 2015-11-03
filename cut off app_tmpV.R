@@ -13,7 +13,7 @@ ui <- fluidPage(
   ),
   sliderInput(inputId = "sensd",
               label = "SD of sensitive distribution",
-              value = 1.45, min = 1, max = 2.1
+              value = 1.45, min = .1, max = 3
   ),
   sliderInput(inputId = "resmu",
               label = "Mean half-life of resistant distribution",
@@ -21,7 +21,7 @@ ui <- fluidPage(
   ),
   sliderInput(inputId = "ressd",
               label = "SD of resistant distribution",
-              value = 1.22, min = 1, max = 2.1
+              value = 1.22, min = .1, max = 3
   ),
   sliderInput(inputId = "cutoff",
               label = "Cut-off half-life value",
@@ -33,41 +33,42 @@ ui <- fluidPage(
   ),
   
   plotOutput(outputId = "graph"),
-  textOutput(outputId = "check")
+  textOutput(outputId = "cutoffexp")
   
 )
 
 server <- function(input, output) {
-  senmuR <- reactive({log(input$senmu)})
-  sensdR <- reactive({log(input$sensd)})
-  resmuR <- reactive({log(input$resmu)})
-  ressdR <- reactive({log(input$ressd)})
+  senmuR <- reactive({input$senmu})
+  sensdR <- reactive({input$sensd})
+  resmuR <- reactive({input$resmu})
+  ressdR <- reactive({input$ressd})
   
   genData <- reactive({
-    nn <- input$nn
-    senmu <- senmuR()
-    sensd <- sensdR()
+    senmu <- log(as.numeric(senmuR()))
+    sensd <- log(as.numeric(sensdR()))
+    resmu <- log(as.numeric(resmuR()))
+    ressd <- log(as.numeric(ressdR()))
     
+    nn <- input$nn
+
     prop_resist <- input$prop_resist
-    resmu <- resmuR()
-    ressd <- ressdR()
+
     
     sen_pop <- rlnorm(nn*(1-prop_resist),senmu,sensd) #sensitive population
     res_pop <- rlnorm(nn*prop_resist,resmu,ressd) #resistant population
     c(sen_pop,res_pop)
     #total_pop <- c(sen_pop,res_pop)
   })
+  
+  cutoffR <- reactive({input$cutoff})
+  
   output$graph <- renderPlot({
-    
     hist(genData(), freq=FALSE,col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
     lines(density(genData()),lwd=5, col="red")
-    abline(v=input$cutoff, lwd=3, col="blue")
-    
-  })
-  output$check <- renderText({
-    max(genData())
+    abline(v=cutoffR, lwd=3, col="blue")
   })
   
+
 }
 
 shinyApp(ui = ui, server = server)
