@@ -32,8 +32,8 @@ ui <- fluidPage(
               value = .1, min = 0, max = 1
   ),
   
-  plotOutput(outputId = "ROC"),
   plotOutput(outputId = "graph"),
+  plotOutput(outputId = "ROC"),
   verbatimTextOutput(outputId = "check")
   
 )
