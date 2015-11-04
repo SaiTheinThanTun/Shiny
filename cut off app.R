@@ -43,17 +43,21 @@ server <- function(input, output) {
   resmuR <- reactive({log(input$resmu)})
   ressdR <- reactive({log(input$ressd)})
   
+  sen_popR <- reactive({input$nn*(1-input$prop_resist)})
+  res_popR <- reactive({input$nn*input$prop_resist})
+  
+  
   genData <- reactive({
-    nn <- input$nn
+    #nn <- input$nn
     senmu <- senmuR()
     sensd <- sensdR()
     
-    prop_resist <- input$prop_resist
+    #prop_resist <- input$prop_resist
     resmu <- resmuR()
     ressd <- ressdR()
     
-    sen_pop <- rlnorm(nn*(1-prop_resist),senmu,sensd) #sensitive population
-    res_pop <- rlnorm(nn*prop_resist,resmu,ressd) #resistant population
+    sen_pop <- rlnorm(sen_popR(),senmu,sensd) #sensitive population
+    res_pop <- rlnorm(res_popR(),resmu,ressd) #resistant population
     c(sen_pop,res_pop)
     #total_pop <- c(sen_pop,res_pop)
   })
