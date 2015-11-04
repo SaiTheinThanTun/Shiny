@@ -44,8 +44,8 @@ server <- function(input, output) {
   resmuR <- reactive({log(input$resmu)})
   ressdR <- reactive({log(input$ressd)})
   
-  sen_popR <- reactive({input$nn*(1-input$prop_resist)})
-  res_popR <- reactive({input$nn*input$prop_resist})
+  sen_popR <- reactive({rlnorm(input$nn*(1-input$prop_resist),senmuR(),sensdR())})
+  res_popR <- reactive({rlnorm(input$nn*input$prop_resist,resmuR(),ressdR())})
   
   
   genData <- reactive({
@@ -57,8 +57,8 @@ server <- function(input, output) {
     resmu <- resmuR()
     ressd <- ressdR()
     
-    sen_pop <- rlnorm(sen_popR(),senmu,sensd) #sensitive population
-    res_pop <- rlnorm(res_popR(),resmu,ressd) #resistant population
+    sen_pop <- sen_popR() #sensitive population
+    res_pop <- res_popR() #resistant population
     c(sen_pop,res_pop)
     #total_pop <- c(sen_pop,res_pop)
   })
@@ -81,8 +81,8 @@ server <- function(input, output) {
   output$ROC <- renderPlot({
     popDF <- cbind(genData(),c(rep(0,length(sen_popR())),rep(1,length(res_popR()))))
     
-    TPR <- sum(res_popR()>input$cutoff)/length(res_popR())
-    FPR <- sum(sen_popR()>input$cutoff)/length(sen_popR())
+    TPR <- sum(res_popR()>=input$cutoff)/length(res_popR())
+    FPR <- sum(sen_popR()>=input$cutoff)/length(sen_popR())
     
     roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE,print.auc=TRUE, show.thres=TRUE)
     points((1-FPR),TPR, col="red")
