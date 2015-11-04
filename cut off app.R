@@ -84,8 +84,8 @@ server <- function(input, output) {
     TPR <- sum(res_popR()>=input$cutoff)/length(res_popR())
     FPR <- sum(sen_popR()>=input$cutoff)/length(sen_popR())
     
-    roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE,print.auc=TRUE, show.thres=TRUE)
-    points((1-FPR),TPR, col="red")
+    roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE, show.thres=TRUE)
+    points((1-FPR),TPR, col="red", pch=19)
   })
 }
 
