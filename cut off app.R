@@ -33,7 +33,7 @@ ui <- fluidPage(
   ),
   
   plotOutput(outputId = "graph"),
-  textOutput(outputId = "check")
+  verbatimTextOutput(outputId = "check")
   
 )
 
@@ -64,8 +64,13 @@ server <- function(input, output) {
     abline(v=input$cutoff, lwd=3, col="blue")
     
   })
-  output$check <- renderText({
-    max(genData())
+  output$check <- renderPrint({
+    true_res <- plnorm(input$cutoff,resmuR(),ressdR(), lower.tail=FALSE) #% identified as resistant from truly resistant pop
+    fal_res <- plnorm(input$cutoff,senmuR(),sensdR(), lower.tail=FALSE) #% identified as resistant from sensitive pop
+    
+    fal_sen <- plnorm(input$cutoff, resmuR(),ressdR()) #% wrongly identified as sensitive from truly resistant pop
+    true_sen <- plnorm(input$cutoff, senmuR(), sensdR()) #% identified as sensitive from truely sensitive pop
+    cat(round(100*true_res,2),"% true resistant, ", round(100*fal_res,2),"% false resistant \n",round(100*fal_sen,2),"% false sensitive, ",round(100*true_sen,2),"% true sensitive")
   })
   
 }
