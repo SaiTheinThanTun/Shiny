@@ -32,6 +32,7 @@ ui <- fluidPage(
               value = .1, min = 0, max = 1
   ),
   
+  plotOutput(outputId = "ROC"),
   plotOutput(outputId = "graph"),
   verbatimTextOutput(outputId = "check")
   
@@ -77,6 +78,15 @@ server <- function(input, output) {
     cat(round(100*true_res,2),"% true resistant, ", round(100*fal_res,2),"% false resistant \n",round(100*fal_sen,2),"% false sensitive, ",round(100*true_sen,2),"% true sensitive")
   })
   
+  output$ROC <- renderPlot({
+    popDF <- cbind(genData(),c(rep(0,length(sen_popR())),rep(1,length(res_popR()))))
+    
+    TPR <- sum(res_popR()>input$cutoff)/length(res_popR())
+    FPR <- sum(sen_popR()>input$cutoff)/length(sen_popR())
+    
+    roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE,print.auc=TRUE, show.thres=TRUE)
+    points((1-FPR),TPR, col="red")
+  })
 }
 
 shinyApp(ui = ui, server = server)
