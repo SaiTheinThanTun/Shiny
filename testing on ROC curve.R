@@ -41,8 +41,8 @@ sen_pop <- rlnorm(nn*(1-pr),log(3),log(1.45))
 res_pop <- rlnorm(nn*pr, log(4),log(1.22))
 total_pop <- c(sen_pop,res_pop)
 b <- cbind(total_pop,c(rep(0,length(sen_pop)),rep(1,length(res_pop))))
-roc(b[,2],b[,1])
-roc(b[,2],b[,1], smooth=TRUE)
+#roc(b[,2],b[,1])
+#roc(b[,2],b[,1], smooth=TRUE)
 
 
 roc3 <- roc(b[,2], b[,1], percent=TRUE, partial.auc=c(100, 90), partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE,print.auc=TRUE, show.thres=TRUE)
@@ -61,3 +61,13 @@ points((1-FPR),TPR, col="red")
 
 
 points((1-FPR2),TPR2)
+
+
+#stacked histogram in R
+library(ggplot2)
+#ggplot doesn't deal with matrix so,
+c <- as.data.frame(b)
+c <- cbind(c, c(rep("sen",length(sen_pop)),rep("res",length(res_pop))))
+names(c)[3] <- "lab"
+ggplot(c, aes(x=total_pop, fill=lab),binwidth = 1) +
+  geom_histogram()

@@ -10,6 +10,9 @@ ui <- fluidPage(
           ),
     column(5,
            plotOutput(outputId = "ROC")
+           ),
+    column(5,
+           plotOutput(outputId = "stacked")
            )
   ),
   fluidRow(
@@ -85,6 +88,11 @@ server <- function(input, output) {
     c(sen_pop,res_pop)
     #total_pop <- c(sen_pop,res_pop)
   })
+  
+  genData.DF <- reactive({
+    cbind(genData(),c(rep(0,length(sen_popR())),rep(1,length(res_popR()))))
+  })
+  
   output$graph <- renderPlot({
     
     hist(genData(), freq=FALSE,col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))), main="Histogram of Simulated Half-Lives", xlab="Half-life (hours)")
@@ -102,13 +110,29 @@ server <- function(input, output) {
   })
   
   output$ROC <- renderPlot({
-    popDF <- cbind(genData(),c(rep(0,length(sen_popR())),rep(1,length(res_popR()))))
+    popDF <- genData.DF()
     
     TPR <- sum(res_popR()>=input$cutoff)/length(res_popR())
     FPR <- sum(sen_popR()>=input$cutoff)/length(sen_popR())
     
     roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE, show.thres=TRUE, main="Receiver Operating Characteristic (ROC) Curve")
     points((1-FPR),TPR, col="red", pch=19)
+  })
+  
+  output$stacked <- renderPlot({
+    popDF2 <- genData.DF() 
+    
+    popDF2[popDF2[,2]==0,2] <- "Sensitive"
+    popDF2[popDF2[,2]==1,2] <- "Resistant"
+    
+    popDF2 <- as.data.frame(popDF2)
+    popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
+    names(popDF2) <- c("Half-life (hours)","Sensitivity")
+    
+    ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity)) +
+      geom_histogram(binwidth = 1) +
+      scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+    
   })
 }
 
