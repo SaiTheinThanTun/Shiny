@@ -8,7 +8,7 @@ ui <- fluidPage(
     column(5,
            plotOutput(outputId = "graph")
           ),
-    column(4,
+    column(5,
            plotOutput(outputId = "ROC")
            )
   ),
@@ -87,7 +87,7 @@ server <- function(input, output) {
   })
   output$graph <- renderPlot({
     
-    hist(genData(), freq=FALSE,col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+    hist(genData(), freq=FALSE,col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))), main="Histogram of Simulated Half-Lives", xlab="Half-life (hours)")
     lines(density(genData()),lwd=5, col="red")
     abline(v=input$cutoff, lwd=3, col="blue")
     
@@ -107,7 +107,7 @@ server <- function(input, output) {
     TPR <- sum(res_popR()>=input$cutoff)/length(res_popR())
     FPR <- sum(sen_popR()>=input$cutoff)/length(sen_popR())
     
-    roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE, show.thres=TRUE)
+    roc(popDF[,2], popDF[,1],  partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE, show.thres=TRUE, main="Receiver Operating Characteristic (ROC) Curve")
     points((1-FPR),TPR, col="red", pch=19)
   })
 }
