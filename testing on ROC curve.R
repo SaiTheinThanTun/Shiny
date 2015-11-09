@@ -40,9 +40,42 @@ cutoff <- 3.5
 sen_pop <- rlnorm(nn*(1-pr),log(3),log(1.45))
 res_pop <- rlnorm(nn*pr, log(4),log(1.22))
 total_pop <- c(sen_pop,res_pop)
-b <- cbind(total_pop,c(rep(0,length(sen_pop)),rep(1,length(res_pop))))
+#b <- cbind(total_pop,c(rep(0,length(sen_pop)),rep(1,length(res_pop))))
+b <- total_pop
+#going back to base plotting system
+hist(b, probability = TRUE, col="grey",lwd=2,ps=20,breaks=as.numeric(floor(min(b)):ceiling(max(b))), main="Histogram of Simulated Half-Lives", xlab="Half-life (hours)")
+hist(res_pop, probability = TRUE, col="red", add=T, breaks=as.numeric(floor(min(b)):ceiling(max(b))))
+lines(density(res_pop),lwd=5, col="red")
+abline(v=cutoff, lwd=3, col="blue")
+
+
 #roc(b[,2],b[,1])
 #roc(b[,2],b[,1], smooth=TRUE)
+popDF2 <- b
+
+popDF2[popDF2[,2]==0,2] <- "Sensitive"
+popDF2[popDF2[,2]==1,2] <- "Resistant"
+
+popDF2 <- as.data.frame(popDF2)
+popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
+names(popDF2) <- c("Half-life (hours)","Sensitivity")
+
+ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour=Sensitivity)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks=as.numeric(floor(min(popDF2[,1])):ceiling(max(popDF2[,1]))))
+
+ggplot(popDF2, aes(x=`Half-life (hours)`, colour=Sensitivity)) +
+  geom_density() +
+  scale_x_continuous(breaks=as.numeric(floor(min(popDF2[,1])):ceiling(max(popDF2[,1]))))
+
+
+
+#NOT smoothed density
+hist(b[,1], freq=FALSE)
+lines(density(b[,1]))
+lines(density(sen_pop))
+lines(density(res_pop),col="red")
+
 
 
 roc3 <- roc(b[,2], b[,1], percent=TRUE, partial.auc=c(100, 90), partial.auc.correct=TRUE, partial.auc.focus="sens",ci=TRUE, boot.n=100, ci.alpha=0.9, stratified=FALSE, plot=TRUE, auc.polygon=TRUE, max.auc.polygon=TRUE, grid=TRUE,print.auc=TRUE, show.thres=TRUE)

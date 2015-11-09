@@ -2,6 +2,7 @@
 
 library(shiny)
 library(pROC)
+library(ggplot2)
 
 ui <- fluidPage(
   fluidRow(
@@ -13,6 +14,9 @@ ui <- fluidPage(
            ),
     column(5,
            plotOutput(outputId = "stacked")
+           ),
+    column(5,
+           plotOutput(outputId = "densityplot")
            )
   ),
   fluidRow(
@@ -20,7 +24,7 @@ ui <- fluidPage(
       h4("Sensitive Distribution"),
       sliderInput(inputId = "senmu",
                   label = "Mean half-life",
-                  value = 3, min = 1, max = 6
+                  value = 3, min = 1, max = 6.5, step = .5
       ),
       sliderInput(inputId = "sensd",
                   label = "SD",
@@ -31,7 +35,7 @@ ui <- fluidPage(
       h4("Resistant Distribution"),
       sliderInput(inputId = "resmu",
                   label = "Mean half-life",
-                  value = 6.5, min = 5, max = 10
+                  value = 6.5, min = 5, max = 10, step = .5
       ),
       sliderInput(inputId = "ressd",
                   label = "SD",
@@ -129,10 +133,28 @@ server <- function(input, output) {
     popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
     names(popDF2) <- c("Half-life (hours)","Sensitivity")
     
+    #ggplot(popDF2, aes(x=`Half-life (hours)` , y= ..density.. , fill=Sensitivity)) +
+    #ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity)) +
     ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity)) +
-      geom_histogram(binwidth = 1) +
+      geom_histogram(position="stack")  +
       scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
     
+  })
+  output$densityplot <- renderPlot({
+    popDF2 <- genData.DF() 
+    
+    #mxmdl <- normalmixEM(popDF2)
+    #plot(mxmdl, which=2)
+    popDF2[popDF2[,2]==0,2] <- "Sensitive"
+    popDF2[popDF2[,2]==1,2] <- "Resistant"
+    
+    popDF2 <- as.data.frame(popDF2)
+    popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
+    names(popDF2) <- c("Half-life (hours)","Sensitivity")
+    
+    ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour= Sensitivity)) +
+      geom_histogram(aes(y=(..count..)/sum(..count..)), alpha=.6, position="stack",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+      scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
   })
 }
 
