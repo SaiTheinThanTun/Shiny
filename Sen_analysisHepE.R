@@ -10,12 +10,12 @@ ui <- fluidPage(
   sliderInput(inputId="l_eff", label= "Effectiveness of latrine", min=0,max=1, step=.1, value=.7),
   sliderInput(inputId="C_latrine", label="Cost of latrine per unit $US",min=20,max=400, step=50, value=200),
   sliderInput(inputId="R0", label="Basic reproduction number",min=1,max=5,step=.1, value=3.5),
-  tableOutput(outputId="CEA")
+  tableOutput(outputId="CEA"),
+  plotOutput(outputId="CEA_Plot")
 )
 
 server <- function(input, output){
-  output$CEA <- renderTable({
-    
+  cea_R <- reactive({
     inFile <- input$file
     cases <- read.csv(inFile$datapath)
     #cases <- read.csv('hepEdata.csv')
@@ -236,6 +236,16 @@ server <- function(input, output){
       # For the sensitivity analysis section delete the below "#"
     }
     CEA_fun(base_parameters, lat_parameters, cost_parameters)
+  })
+  output$CEA <- renderTable({
+    cea_R()
+    
+  })
+  output$CEA_Plot <- renderPlot({
+    cea <- cea_R()
+    plot(cea[1,2], cea[1,1], xlim=c(-50, 100), ylim=c(-80000,200000), ylab="Incremental costs", xlab="DALY averted")
+    abline(v = 0, h = 0)
+    abline(a=0, b=675,lty = 3)
   })
 }
 
