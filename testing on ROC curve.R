@@ -104,3 +104,30 @@ c <- cbind(c, c(rep("sen",length(sen_pop)),rep("res",length(res_pop))))
 names(c)[3] <- "lab"
 ggplot(c, aes(x=total_pop, fill=lab),binwidth = 1) +
   geom_histogram()
+
+library(mixtools)
+mxmdl = normalmixEM(b)
+plot(mxmdl, which=2)
+lines(density(b, lty=2, lwd=2))
+
+#example of normalized histogram from web
+# Fake data (two normal distributions)
+set.seed(20)
+dat1 = data.frame(x=rnorm(1000, 100, 10), group="A")
+dat2 = data.frame(x=rnorm(200, 120, 20), group="B")
+dat = rbind(dat1, dat2)
+
+ggplot(dat, aes(x, fill=group, colour=group)) +
+  geom_histogram(breaks=seq(0,200,5), alpha=0.6, 
+                 position="identity", lwd=0.2) +
+  ggtitle("Unormalized")
+
+ggplot(dat, aes(x, fill=group, colour=group)) +
+  geom_histogram(aes(y=2*(..density..)/sum(..density..)), breaks=seq(0,200,5), alpha=0.6, 
+                 position="identity", lwd=0.2) +
+  ggtitle("Normalized")
+
+ggplot(dat, aes(x, fill=group, colour=group)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)), breaks=seq(0,200,5), alpha=0.6, 
+                 position="identity", lwd=0.2) +
+  ggtitle("Normalized")
