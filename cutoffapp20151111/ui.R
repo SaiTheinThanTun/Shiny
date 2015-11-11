@@ -43,8 +43,13 @@ fluidPage(
                        label = "Cut-off half-life value",
                        value = 5, min = 0, max = 10, step=.5
            ),
+           h4("Histogram options"),
            checkboxInput(inputId = "bStacked",
                          label = "Stacked histogram",
+                         value = TRUE
+           ),
+           checkboxInput(inputId = "bDensity",
+                         label = "Density",
                          value = TRUE
            )
     )

@@ -44,8 +44,13 @@ ui <- fluidPage(
                        label = "Cut-off half-life value",
                        value = 5, min = 0, max = 10, step=.5
            ),
+           h4("Histogram options"),
            checkboxInput(inputId = "bStacked",
                          label = "Stacked histogram",
+                         value = TRUE
+                         ),
+           checkboxInput(inputId = "bDensity",
+                         label = "Density",
                          value = TRUE
                          )
     )
@@ -121,21 +126,42 @@ server <- function(input, output) {
     popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
     names(popDF2) <- c("Half-life (hours)","Sensitivity")
     
-    if(input$bStacked){
-      ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour= Sensitivity)) + theme_bw() +
-        geom_histogram(aes(y=(..count..)/sum(..count..)), alpha=.8, position="stack",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
-        geom_vline(xintercept= input$cutoff, colour="red", size=1) + ylab("Density") + ggtitle("Stacked Histogram of Simulated Half-Lives")+
-        theme(plot.title= element_text(face="bold")) +
-        scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+    if(input$bDensity){
+      if(input$bStacked){
+        ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour= Sensitivity)) + theme_bw() +
+          geom_histogram(aes(y=(..count..)/sum(..count..)), alpha=.8, position="stack",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+          geom_vline(xintercept= input$cutoff, colour="red", size=1) + ylab("Density") + ggtitle("Stacked Histogram of Simulated Half-Lives")+
+          theme(plot.title= element_text(face="bold")) +
+          scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+      }
+      
+      else {
+        ggplot(popDF2, aes(x=`Half-life (hours)`)) + theme_bw() +
+          geom_histogram(aes(y=(..count..)/sum(..count..), fill=Sensitivity, colour= Sensitivity), alpha=.4, position="identity",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+          geom_vline(xintercept= input$cutoff, colour="red", size=1) + ylab("Density") + ggtitle("Histogram of Simulated Half-Lives")+
+          theme(plot.title= element_text(face="bold")) +
+          scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+      }
     }
     
-    else {
-      ggplot(popDF2, aes(x=`Half-life (hours)`)) + theme_bw() +
-        geom_histogram(aes(y=(..count..)/sum(..count..), fill=Sensitivity, colour= Sensitivity), alpha=.4, position="identity",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
-        geom_vline(xintercept= input$cutoff, colour="red", size=1) + ylab("Density") + ggtitle("Histogram of Simulated Half-Lives")+
-        theme(plot.title= element_text(face="bold")) +
-        scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+    else{
+      if(input$bStacked){
+        ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour= Sensitivity)) + theme_bw() +
+          geom_histogram(alpha=.8, position="stack",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+          geom_vline(xintercept= input$cutoff, colour="red", size=1) + ggtitle("Stacked Histogram of Simulated Half-Lives")+
+          theme(plot.title= element_text(face="bold")) +
+          scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+      }
+      
+      else {
+        ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity, colour= Sensitivity)) + theme_bw() +
+          geom_histogram( alpha=.4, position="identity",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+          geom_vline(xintercept= input$cutoff, colour="red", size=1) + ggtitle("Histogram of Simulated Half-Lives")+
+          theme(plot.title= element_text(face="bold")) +
+          scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
+      }
     }
+    
     
     
   })
