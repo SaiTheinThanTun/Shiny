@@ -142,6 +142,8 @@ server <- function(input, output) {
   output$stacked <- renderPlot({
     popDF2 <- genData.DF() 
     
+    #mxmdl <- normalmixEM(popDF2)
+    #plot(mxmdl, which=2)
     popDF2[popDF2[,2]==0,2] <- "Sensitive"
     popDF2[popDF2[,2]==1,2] <- "Resistant"
     
@@ -149,12 +151,12 @@ server <- function(input, output) {
     popDF2[,1] <- as.numeric(as.character(popDF2[,1]))
     names(popDF2) <- c("Half-life (hours)","Sensitivity")
     
-    #ggplot(popDF2, aes(x=`Half-life (hours)` , y= ..density.. , fill=Sensitivity)) +
-    #ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity)) +
-    ggplot(popDF2, aes(x=`Half-life (hours)`, fill=Sensitivity)) +
-      geom_histogram(position="stack")  +
-      scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
     
+    ggplot(popDF2, aes(x=`Half-life (hours)`)) + theme_bw() +
+      geom_histogram(aes(y=(..count..)/sum(..count..), fill=Sensitivity, colour= Sensitivity), alpha=.4, position="identity",breaks=as.numeric(floor(min(genData())):ceiling(max(genData())))) +
+      geom_vline(xintercept= input$cutoff, colour="red", size=1) + ylab("Density") + ggtitle("Histogram of Simulated Half-Lives")+
+      geom_density() +
+      scale_x_continuous(breaks=as.numeric(floor(min(genData())):ceiling(max(genData()))))
   })
   output$densityplot <- renderPlot({
     popDF2 <- genData.DF() 
