@@ -1,8 +1,8 @@
 name: mixture_model
 account: saitheinthantun
 server: shinyapps.io
-bundleId: 347442
+bundleId: 388921
 url: https://saitheinthantun.shinyapps.io/mixture_model/
-when: 1452522442.45929
+when: 1457306681.42114
 asMultiple: FALSE
 asStatic: FALSE

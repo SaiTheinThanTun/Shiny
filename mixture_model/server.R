@@ -124,7 +124,7 @@ shinyServer (
         each patient belonging to each of the component distributions depicted in the graph."})
       
       output$geometric_means_and_proportions <- renderPrint({
-        
+        j <- length(na.omit(output.mu))
         cat("The model predicts ", j, " component geometric mean half lives (hours):",
             
             "\n\n")
@@ -132,11 +132,11 @@ shinyServer (
         for (a in 1:j) {
           cat("Distribution",a,"\n",
               
-              "Geometric mean = ", exp(res$mu[a]),
+              "Geometric mean = ", exp(output.mu[a]),
               
               "\n", 
               
-              "Contribution to composite distribution = ", res$lambda[a],
+              "Contribution to composite distribution = ", output.lambda[a],
               
               "\n\n"
               
@@ -168,9 +168,9 @@ shinyServer (
       Sys.sleep(0.02)
     }
     
-    means <- res$mu
-    spreads <- res$sigma
-    proportions <- res$lambda
+    means <- na.omit(output.mu)
+    spreads <- na.omit(output.sigma)
+    proportions <- na.omit(output.lambda)
     
     output$Prob_of_resistance_in_given_patient <- renderPrint({
       
